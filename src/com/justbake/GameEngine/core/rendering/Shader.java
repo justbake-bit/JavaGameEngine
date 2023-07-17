@@ -2,6 +2,7 @@ package com.justbake.GameEngine.core.rendering;
 
 import com.justbake.GameEngine.utils.errors.ShaderCompilationError;
 import com.justbake.GameEngine.utils.errors.ShaderLinkingError;
+import com.justbake.GameEngine.utils.math.Matrix4f;
 
 public interface Shader {
     /**
@@ -26,4 +27,6 @@ public interface Shader {
      * @return the source of the shader as a String
      */
     String getShaderSource(ShaderType shaderType);
+
+    void uploadMatrix4f(String varName, Matrix4f matrix);
 }

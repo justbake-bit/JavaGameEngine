@@ -2,9 +2,11 @@ package com.justbake.GameEngine.GLFW;
 
 import com.justbake.GameEngine.core.Window;
 import com.justbake.GameEngine.core.WindowFactory;
+import com.justbake.GameEngine.core.scenes.Scene;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -35,29 +37,49 @@ public class GLFWWindowFactory implements WindowFactory {
      *
      */
     @Override
-    public void pollEvents() {
+    public void updateWindows() {
         glfwPollEvents();
+
+        for (GLFWWindow window : windows) {
+            for(Scene scene : window.getCurrentScenes()){
+                scene.update();
+            }
+        }
+    }
+
+    @Override
+    public void renderWindows() {
+        for (GLFWWindow window : windows) {
+            glfwSwapBuffers(window.id());
+            for(Scene scene : window.getCurrentScenes()){
+                scene.render();
+            }
+        }
     }
 
     /**
      * loops over all current GLFWWindows in the windows list.
      * if all windows should close then return false.
      * if a window should close, destroy the window.
-     * while looping over the windows swap the buffers on the windows.
      * @return true if all windows should close. false otherwise
      */
     @Override
     public boolean hasOpenWindow() {
         boolean allWindowsShouldClose = true;
-        for (GLFWWindow window : windows.stream().toList()) {
-            if(! glfwWindowShouldClose(window.getId())) {
-                glfwSwapBuffers(window.getId());
+
+        Iterator<GLFWWindow> iterator = windows.iterator();
+
+        while(iterator.hasNext()){
+            GLFWWindow next = iterator.next();
+            long id = next.id();
+            if(! glfwWindowShouldClose(id)) {
                 allWindowsShouldClose = false;
-            }
-            else {
-                destroyWindow(window);
+            }else{
+                glfwDestroyWindow(id);
+                iterator.remove();
             }
         }
+
         return ! allWindowsShouldClose;
     }
 
@@ -94,7 +116,7 @@ public class GLFWWindowFactory implements WindowFactory {
         if ( windowId == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
-        GLFWWindow glfwWindow = new GLFWWindow(windowId);
+        GLFWWindow glfwWindow = new GLFWWindow(windowId, null);
 
         glfwSetWindowFocusCallback(windowId, this::windowFocusCallback);
 
@@ -111,8 +133,8 @@ public class GLFWWindowFactory implements WindowFactory {
     {
         if(window instanceof GLFWWindow glfwWindow && windows.contains(glfwWindow)) {
             windows.remove(glfwWindow);
-            glfwSetWindowFocusCallback(glfwWindow.getId(), null);
-            glfwDestroyWindow(glfwWindow.getId());
+            glfwSetWindowFocusCallback(glfwWindow.id(), null);
+            glfwDestroyWindow(glfwWindow.id());
             return true;
         }
         return false;
@@ -139,7 +161,7 @@ public class GLFWWindowFactory implements WindowFactory {
 
     private void setWindowInput(long windowId){
         for (GLFWWindow window : windows) {
-            long windowRemoveId = window.getId();
+            long windowRemoveId = window.id();
 
             glfwSetKeyCallback(windowRemoveId, null);
             glfwSetCursorPosCallback(windowRemoveId, null);

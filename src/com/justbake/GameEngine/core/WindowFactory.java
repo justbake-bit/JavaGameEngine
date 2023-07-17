@@ -14,5 +14,7 @@ public interface WindowFactory {
 
     void terminate();
 
-    void pollEvents();
+    void updateWindows();
+
+    void renderWindows();
 }

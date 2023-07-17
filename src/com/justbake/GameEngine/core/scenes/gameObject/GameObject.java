@@ -1,6 +1,8 @@
 package com.justbake.GameEngine.core.scenes.gameObject;
 
+import com.justbake.GameEngine.core.scenes.Scene;
 import com.justbake.GameEngine.core.scenes.gameObject.components.GameObjectComponent;
+import com.justbake.GameEngine.core.scenes.gameObject.components.TransformComponent;
 import com.justbake.GameEngine.core.scenes.gameObject.components.annotations.RequireComponent;
 
 import java.lang.annotation.Annotation;
@@ -8,11 +10,13 @@ import java.util.*;
 
 public class GameObject {
 
-    private String name;
+    private final String name;
     private final UUID uuid;
     public boolean isActive = true;
     private final List<GameObject> children;
     private final List<GameObjectComponent> components;
+
+    private Scene scene;
 
     public GameObject(String name) {
         this.name = name;
@@ -27,6 +31,7 @@ public class GameObject {
     }
 
     public GameObject addComponent(GameObjectComponent gameObjectComponent) {
+        gameObjectComponent.setGameObject(this);
 
         List<String> log = new ArrayList<>();
         Boolean hasAllRequiredComponents = true;
@@ -55,8 +60,23 @@ public class GameObject {
         return this;
     }
 
+    public GameObject addToScene(Scene scene) {
+        scene.addGameObject(this);
+        return this;
+    }
+
     public <T extends GameObjectComponent> boolean hasComponentOfType(Class<T> t) {
-        return components.stream().anyMatch(gameObjectComponent -> gameObjectComponent.getClass().isAssignableFrom(t));
+        return components.stream().anyMatch(gameObjectComponent -> gameObjectComponent.getClass().equals(t));
+    }
+
+    public <T extends GameObjectComponent> T getComponent(Class<T> componentClass){
+
+        for (GameObjectComponent component : components) {
+            if (component.getClass().equals(componentClass))
+                return componentClass.cast(component);
+        }
+
+        return null;
     }
 
     public GameObject setActive(boolean active) {
@@ -110,6 +130,14 @@ public class GameObject {
     public UUID getUuid()
     {
         return this.uuid;
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
+    public void setScene(Scene scene) {
+        this.scene = scene;
     }
 
     @Override

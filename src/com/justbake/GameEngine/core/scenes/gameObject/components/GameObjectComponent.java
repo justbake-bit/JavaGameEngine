@@ -1,5 +1,6 @@
 package com.justbake.GameEngine.core.scenes.gameObject.components;
 
+import com.justbake.GameEngine.core.scenes.gameObject.GameObject;
 import com.justbake.GameEngine.core.scenes.gameObject.components.annotations.dispose;
 import com.justbake.GameEngine.core.scenes.gameObject.components.annotations.init;
 import com.justbake.GameEngine.core.scenes.gameObject.components.annotations.render;
@@ -21,6 +22,8 @@ public abstract class GameObjectComponent {
     private final List<Method> disposeMethods;
 
     private final Object instance;
+
+    private GameObject gameObject;
 
     public GameObjectComponent() {
         instance = this;
@@ -94,5 +97,13 @@ public abstract class GameObjectComponent {
                 e.printStackTrace();
             }
         });
+    }
+
+    public GameObject getGameObject() {
+        return gameObject;
+    }
+
+    public void setGameObject(GameObject gameObject) {
+        this.gameObject = gameObject;
     }
 }
